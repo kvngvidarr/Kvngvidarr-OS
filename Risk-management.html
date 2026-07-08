@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KVNGVIDARR — EXECUTION DASHBOARD</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', system_ui, sans-serif; background: #0A0A0A; color: #E5E5E5; }
+        .font-display { font-family: 'Space Grotesk', 'Inter', sans-serif; font-weight: 600; }
+        .section-header { font-size: 0.7rem; letter-spacing: 1.5px; font-weight: 700; text-transform: uppercase; color: #D4AF37; }
+        .trading-card { background-color: #111111; border: 1px solid #222222; }
+        .trading-card:hover { border-color: #D4AF37; }
+        .quick-btn { background-color: #1F1F1F; border: 1px solid #333333; transition: all 0.1s ease; }
+        .quick-btn:hover { background-color: #D4AF37; color: #111111; border-color: #D4AF37; }
+        .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+        .rich-gold { color: #D4AF37; }
+    </style>
+</head>
+<body>
+    <!-- HEADER -->
+    <nav class="border-b border-[#222222] bg-[#0A0A0A] sticky top-0 z-50">
+        <div class="max-w-screen-2xl mx-auto px-8">
+            <div class="py-5 flex items-center justify-between">
+                <div>
+                    <div class="font-display text-3xl tracking-[-1.5px] font-bold text-white">KVNGVIDARR</div>
+                    <div class="text-[10px] text-[#D4AF37] -mt-1 tracking-[3px] font-mono">EXECUTION DASHBOARD</div>
+                </div>
+                <div class="flex items-center gap-x-4">
+                    <div class="flex items-center gap-x-2 px-4 py-1.5 bg-[#111111] rounded-2xl border border-[#222222]">
+                        <i class="fa-solid fa-clock text-[#D4AF37]"></i>
+                        <div>
+                            <span id="live-time" class="font-mono text-sm font-semibold"></span>
+                            <span class="text-[10px] text-[#666] ml-1">NY TIME</span>
+                        </div>
+                    </div>
+                    <div onclick="resetAllData()" class="cursor-pointer px-4 py-2 text-xs flex items-center gap-x-2 hover:bg-[#1A1A1A] transition-colors rounded-2xl border border-[#333333]">
+                        <i class="fa-solid fa-redo"></i>
+                        <span>RESET</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="border-t border-[#222222] bg-[#111111]">
+            <div class="max-w-screen-2xl mx-auto px-8 py-3 flex items-center gap-x-3 overflow-x-auto">
+                <div class="text-xs text-[#666] mr-2 font-semibold tracking-widest">QUICK ACTIONS</div>
+                <button onclick="jumpToSection('baseline-protocol')" class="quick-btn px-5 py-2 text-xs font-bold rounded-2xl flex items-center gap-x-2">
+                    <i class="fa-solid fa-layer-group"></i>
+                    <span>BASELINE PROTOCOL</span>
+                </button>
+                <button onclick="jumpToSection('delivery-macro')" class="quick-btn px-5 py-2 text-xs font-bold rounded-2xl flex items-center gap-x-2">
+                    <i class="fa-solid fa-project-diagram"></i>
+                    <span>DELIVERY + MACRO</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-screen-2xl mx-auto px-8 py-6">
+
+        <!-- BASELINE CAMPAIGN EXTRACTION PROTOCOL -->
+        <div id="baseline-protocol" class="mb-10">
+            <div class="flex items-end justify-between mb-4">
+                <div>
+                    <div class="section-header">BASELINE CAMPAIGN EXTRACTION PROTOCOL</div>
+                    <div class="text-3xl font-display tracking-tight">Progressive • Self-adjusting • Pre-calculated checkpoints</div>
+                </div>
+            </div>
+
+            <div class="trading-card rounded-3xl p-6">
+                
+                <!-- Risk Structure -->
+                <div class="mb-6">
+                    <div class="text-sm font-bold mb-3 text-[#D4AF37]">CAMPAIGN RISK STRUCTURE</div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="text-xs text-[#666]">Original Campaign Risk Budget ($)</label>
+                            <input id="original-budget" type="number" value="150" class="w-full bg-[#0A0A0A] border border-[#333333] rounded-2xl px-4 py-2.5 text-xl mono" oninput="runBaselineProtocol()">
+                        </div>
+                        <div>
+                            <label class="text-xs text-[#666] font-bold">Active Position Risk (Deployed) *</label>
+                            <input id="active-risk" type="number" value="150" class="w-full bg-[#0A0A0A] border border-emerald-600 rounded-2xl px-4 py-2.5 text-xl mono" oninput="runBaselineProtocol()">
+                        </div>
+                        <div>
+                            <label class="text-xs text-[#666]">Current Open Lot Size</label>
+                            <input id="current-lots" type="number" step="0.001" value="0.05" class="w-full bg-[#0A0A0A] border border-[#333333] rounded-2xl px-4 py-2.5 text-xl mono" oninput="runBaselineProtocol()">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Inputs -->
+                <div class="mb-6">
+                    <div class="text-sm font-bold mb-3 text-[#D4AF37]">LIVE INPUTS</div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-xs text-[#666]">Current Floating P&amp;L ($)</label>
+                            <input id="floating-pnl" type="number" value="240" class="w-full bg-[#0A0A0A] border border-[#333333] rounded-2xl px-4 py-2.5 text-xl mono" oninput="runBaselineProtocol()">
+                        </div>
+                        <div>
+                            <label class="text-xs text-[#666]">Daily Minimum Objective ($)</label>
+                            <input id="daily-objective" type="number" value="75" class="w-full bg-[#0A0A0A] border border-[#333333] rounded-2xl px-4 py-2.5 text-xl mono" oninput="runBaselineProtocol()">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Output -->
+                <div>
+                    <div class="text-sm font-bold mb-3 text-[#D4AF37]">BASELINE PROTOCOL — PRE-CALCULATED RECOMMENDATIONS</div>
+                    <div id="baseline-output" class="bg-[#0A0A0A] border border-[#222222] rounded-2xl p-5 space-y-4 text-sm"></div>
+                </div>
+
+                <!-- Reference -->
+                <div class="mt-4 bg-[#0A0A0A] border border-[#222222] rounded-2xl p-4 text-xs">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <div class="font-bold text-amber-400">PROTOCOL TRIGGER</div>
+                            <div class="text-2xl font-bold mono">1.58 R</div>
+                            <div class="text-[#666]">Mean of 1:1 / 1:2 / 1.75 — Used for staged extraction</div>
+                        </div>
+                        <div>
+                            <div class="font-bold text-[#666]">HISTORICAL BENCHMARK (Reference)</div>
+                            <div class="text-2xl font-bold mono">1.75 R</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- DELIVERY + MACRO -->
+        <div id="delivery-macro" class="mb-10">
+            <div class="section-header mb-3">DELIVERY + MACRO TREND — LIVE STATUS</div>
+            
+            <div class="trading-card rounded-3xl p-6 mb-5">
+                <div class="text-sm font-bold mb-3 text-[#D4AF37]">S1 / S2 / S3 OPERATIONAL RULES</div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                    <div class="bg-[#0A0A0A] p-3 rounded-2xl border border-emerald-900">
+                        <div class="font-bold text-emerald-400">S1 — SUSTAINED</div>
+                        <div>Full execution + POB scaling + Runner mode. Protect only on structural invalidation.</div>
+                    </div>
+                    <div class="bg-[#0A0A0A] p-3 rounded-2xl border border-amber-900">
+                        <div class="font-bold text-amber-400">S2 — TRANSITIONAL</div>
+                        <div>No new adds. No scaling. Only runner preservation + rotational exits.</div>
+                    </div>
+                    <div class="bg-[#0A0A0A] p-3 rounded-2xl border border-red-900">
+                        <div class="font-bold text-red-400">S3 — DECAYING</div>
+                        <div>Flatten rotational. Stand down. Hold runner only. Reset RCC.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="trading-card rounded-3xl p-6 mb-5">
+                <div class="font-bold mb-3">DELIVERY TRANCHE (Interactive)</div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="delivery-interactive"></div>
+            </div>
+
+            <div class="trading-card rounded-3xl p-6 mb-5">
+                <div class="font-bold mb-3">MACRO TREND SUSTENANCE (Interactive)</div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="macro-interactive"></div>
+            </div>
+
+            <!-- Delivery + Macro Recommendations Output -->
+            <div class="trading-card rounded-3xl p-6">
+                <div class="font-bold mb-3 text-[#D4AF37]">DELIVERY + MACRO RECOMMENDATIONS (Final Orders)</div>
+                <div id="delivery-macro-recommendations" class="bg-[#0A0A0A] border border-[#222222] rounded-2xl p-5 text-sm"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function updateClock() {
+            const el = document.getElementById('live-time');
+            function tick() {
+                const now = new Date();
+                const nyTime = now.toLocaleTimeString('en-US', { timeZone: 'America/New_York', hour: '2-digit', minute: '2-digit', hour12: false });
+                el.textContent = nyTime;
+            }
+            tick();
+            setInterval(tick, 30000);
+        }
+
+        function jumpToSection(section) {
+            const el = document.getElementById(section);
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function runBaselineProtocol() {
+            const output = document.getElementById('baseline-output');
+            
+            const activeRisk = parseFloat(document.getElementById('active-risk').value) || 150;
+            const currentLots = parseFloat(document.getElementById('current-lots').value) || 0.05;
+            const floating = parseFloat(document.getElementById('floating-pnl').value) || 0;
+            const dailyObj = parseFloat(document.getElementById('daily-objective').value) || 75;
+
+            const currentR = floating / activeRisk;
+            const protocolTrigger = 1.58;
+            const secondStage = protocolTrigger * 2;
+
+            let html = '';
+
+            html += `<div class="flex justify-between mb-4">
+                <div>
+                    <div class="text-xs text-[#666]">CURRENT R (on Active Position Risk)</div>
+                    <div class="text-4xl font-bold mono ${currentR >= 1 ? 'text-emerald-400' : 'text-amber-400'}">${currentR.toFixed(2)}R</div>
+                </div>
+                <div class="text-right">
+                    <div class="text-xs text-[#666]">ACTIVE RISK / LOTS</div>
+                    <div class="text-xl font-bold mono">$${activeRisk} | ${currentLots} lots</div>
+                </div>
+            </div>`;
+
+            // Priority Order: Daily Objective first, then staged extraction (protect baselines)
+            if (floating < dailyObj) {
+                html += `
+                    <div class="bg-[#111111] border border-[#333333] rounded-2xl p-4">
+                        <div class="font-bold text-amber-400">PRIORITY: SECURE DAILY OBJECTIVE FIRST</div>
+                        <div class="mt-2 text-sm">Floating is below daily target ($${dailyObj}). Focus on reaching the daily floor. Staged extraction begins only after daily objective is secured.</div>
+                    </div>
+                `;
+            } 
+            else if (currentR >= 3.5) {
+                // Stage 2 — only at significantly higher R after daily objective is secured
+                const extractLots = (currentLots * 0.25).toFixed(3);
+                html += `
+                    <div class="bg-emerald-950 border border-emerald-900 rounded-2xl p-4">
+                        <div class="font-bold text-emerald-400">STAGE 2 — SECOND EXTRACTION</div>
+                        <div class="mt-2">Close <span class="font-mono font-bold">${extractLots} lots</span> (25% of current position)</div>
+                        <div class="text-xs mt-3">Daily objective secured. Significant extraction complete. Shift to Runner Mode.</div>
+
+                        <div class="mt-3 pt-3 border-t border-emerald-800">
+                            <div class="font-bold text-emerald-400 text-xs">RUNNER MANAGEMENT — TRAILING RULE</div>
+                            <div class="text-xs mt-1">Trail stop <span class="font-bold">15 points</span> behind the latest respected M5/M15 validated FVG.</div>
+                            <div class="text-[10px] text-[#999] mt-1">Locks in extraction gains + auto-protects on reversal. (FX: 15 pips)</div>
+                        </div>
+                    </div>
+                `;
+            } 
+            else if (currentR >= protocolTrigger) {
+                // Stage 1 — 50% extraction once daily objective is secured
+                const extractLots = (currentLots * 0.50).toFixed(3);
+                const remainingLotsAfter = (currentLots * 0.50).toFixed(3);
+                const newActiveRisk = activeRisk * 0.50;
+                const nextTargetFloating = (newActiveRisk * 3.2).toFixed(0);
+                const nextExtractLots = (parseFloat(remainingLotsAfter) * 0.25).toFixed(3);
+
+                html += `
+                    <div class="bg-amber-950 border border-amber-900 rounded-2xl p-4">
+                        <div class="font-bold text-amber-400 mb-2">STAGE 1 — 50% EXTRACTION (at 1.58R) — Daily Objective Secured</div>
+                        
+                        <div class="mb-3">
+                            <div class="text-sm">Close <span class="font-mono font-bold text-lg">${extractLots} lots</span> from current position</div>
+                            <div class="text-xs text-[#999]">New remaining lot size: <span class="font-mono">${remainingLotsAfter} lots</span></div>
+                            <div class="text-xs text-[#999]">New Active Position Risk after extraction: <span class="font-mono">~$${newActiveRisk}</span></div>
+                        </div>
+
+                        <div class="pt-3 border-t border-amber-800">
+                            <div class="font-bold text-xs mb-1">PRE-CALCULATED NEXT CHECKPOINT (on reduced risk)</div>
+                            <div class="text-xs">Next trigger: <span class="font-mono font-bold">~3.2R</span> on new active risk</div>
+                            <div class="text-xs">Floating profit needed to trigger 25%: <span class="font-mono font-bold">~$${nextTargetFloating}</span></div>
+                            <div class="text-xs">Lot size to close at that point: <span class="font-mono font-bold">~${nextExtractLots} lots</span></div>
+                        </div>
+
+                        <div class="mt-3 pt-3 border-t border-amber-800">
+                            <div class="font-bold text-emerald-400 text-xs">RUNNER MANAGEMENT — TRAILING RULE</div>
+                            <div class="text-xs mt-1">Trail stop <span class="font-bold">15 points</span> behind the latest respected M5/M15 validated FVG.</div>
+                            <div class="text-[10px] text-[#999] mt-1">Locks in extraction gains + auto-protects on reversal. (FX pairs: 15 pips)</div>
+                        </div>
+                    </div>
+                `;
+            } 
+            else {
+                html += `
+                    <div class="bg-emerald-950 border border-emerald-900 rounded-2xl p-4">
+                        <div class="font-bold text-emerald-400">DAILY OBJECTIVE SECURED</div>
+                        <div class="mt-2 text-sm">Daily floor reached. Current R on active risk below 1.58R extraction trigger.</div>
+                        <div class="text-xs mt-3">Allow delivery to develop or extract manually if M30/H1 is weakening.</div>
+                    </div>
+                `;
+            }
+
+            output.innerHTML = html;
+            updateDeliveryMacroRecommendations();
+        }
+
+        function createInteractiveDelivery() {
+            const container = document.getElementById('delivery-interactive');
+            container.innerHTML = '';
+            ['m5','m15','m30','h1'].forEach(tf => {
+                const div = document.createElement('div');
+                div.className = 'bg-[#0A0A0A] border border-[#222222] rounded-2xl p-4';
+                div.innerHTML = `
+                    <div class="font-bold mb-2">${tf.toUpperCase()} Delivery</div>
+                    <select id="int-${tf}" class="w-full bg-[#111111] border border-[#333333] text-xs rounded-xl px-3 py-2" onchange="updateDeliveryMacroRecommendations()">
+                        <option value="S1">S1 — Sustained</option>
+                        <option value="S2">S2 — Transitional</option>
+                        <option value="S3">S3 — Decaying</option>
+                    </select>
+                `;
+                container.appendChild(div);
+            });
+            setTimeout(() => {
+                document.getElementById('int-m5').value = 'S1';
+                document.getElementById('int-m15').value = 'S1';
+                document.getElementById('int-m30').value = 'S2';
+                document.getElementById('int-h1').value = 'S3';
+                updateDeliveryMacroRecommendations();
+            }, 100);
+        }
+
+        function createInteractiveMacro() {
+            const container = document.getElementById('macro-interactive');
+            container.innerHTML = '';
+            ['h4','daily','weekly','monthly'].forEach(tf => {
+                const div = document.createElement('div');
+                div.className = 'bg-[#0A0A0A] border border-[#222222] rounded-2xl p-4';
+                div.innerHTML = `
+                    <div class="font-bold mb-2">${tf.toUpperCase()} Sustenance</div>
+                    <select id="int-${tf}" class="w-full bg-[#111111] border border-[#333333] text-xs rounded-xl px-3 py-2" onchange="updateDeliveryMacroRecommendations()">
+                        <option value="SUSTAINED">SUSTAINED</option>
+                        <option value="WEAKENING">WEAKENING</option>
+                        <option value="NOT_YET">NOT YET</option>
+                    </select>
+                `;
+                container.appendChild(div);
+            });
+            setTimeout(() => {
+                document.getElementById('int-h4').value = 'SUSTAINED';
+                document.getElementById('int-daily').value = 'SUSTAINED';
+                document.getElementById('int-weekly').value = 'SUSTAINED';
+                document.getElementById('int-monthly').value = 'SUSTAINED';
+                updateDeliveryMacroRecommendations();
+            }, 100);
+        }
+
+        function updateDeliveryMacroRecommendations() {
+            const container = document.getElementById('delivery-macro-recommendations');
+            if (!container) return;
+
+            const m5 = document.getElementById('int-m5') ? document.getElementById('int-m5').value : 'S1';
+            const m15 = document.getElementById('int-m15') ? document.getElementById('int-m15').value : 'S1';
+            const m30 = document.getElementById('int-m30') ? document.getElementById('int-m30').value : 'S2';
+            const h1 = document.getElementById('int-h1') ? document.getElementById('int-h1').value : 'S3';
+
+            const h4 = document.getElementById('int-h4') ? document.getElementById('int-h4').value : 'SUSTAINED';
+            const daily = document.getElementById('int-daily') ? document.getElementById('int-daily').value : 'SUSTAINED';
+            const weekly = document.getElementById('int-weekly') ? document.getElementById('int-weekly').value : 'SUSTAINED';
+            const monthly = document.getElementById('int-monthly') ? document.getElementById('int-monthly').value : 'SUSTAINED';
+
+            const sustainedCount = [m5, m15, m30, h1].filter(s => s === 'S1').length;
+            const macroSustained = [h4, daily, weekly, monthly].filter(s => s === 'SUSTAINED').length;
+
+            let overall = '';
+            let action = '';
+            let detail = '';
+
+            if (sustainedCount >= 3 && macroSustained >= 3) {
+                overall = 'STRONG SUSTAINED REGIME';
+                action = 'FULL EXECUTION + POB SCALING ALLOWED';
+                detail = 'High probability environment. Runner mode active. Trail behind M5/M15 FVG after extraction.';
+            } else if (sustainedCount >= 2 && macroSustained >= 2) {
+                overall = 'CONSTRUCTIVE DELIVERY';
+                action = 'EXECUTION PERMITTED — MANAGE RISK ACTIVELY';
+                detail = 'Proceed with caution. Prefer Base leg execution. Tighten runner management.';
+            } else if (sustainedCount <= 1 || macroSustained <= 1) {
+                overall = 'WEAK / TRANSITIONAL REGIME';
+                action = 'NO NEW ADDS — ONLY MANAGE EXISTING EXPOSURE';
+                detail = 'Focus on runner preservation and rotational exits. Avoid fresh deployment.';
+            } else {
+                overall = 'DEGRADING / UNRESOLVED';
+                action = 'STAND DOWN NEW ENTRIES';
+                detail = 'Flatten rotational legs. Hold runner only. Reset interpretation until clarity returns.';
+            }
+
+            container.innerHTML = `
+                <div class="mb-3">
+                    <div class="text-xs text-[#666]">OVERALL REGIME</div>
+                    <div class="text-xl font-bold">${overall}</div>
+                </div>
+                <div class="mb-3">
+                    <div class="text-xs text-[#666]">RECOMMENDED ACTION</div>
+                    <div class="text-lg font-bold text-emerald-400">${action}</div>
+                </div>
+                <div class="text-xs text-[#999]">${detail}</div>
+                <div class="mt-3 pt-3 border-t border-[#222222] text-[10px] text-[#666]">
+                    Delivery Health: ${sustainedCount}/4 timeframes S1 &nbsp;|&nbsp; Macro Health: ${macroSustained}/4 timeframes Sustained
+                </div>
+            `;
+        }
+
+        function resetAllData() {
+            if (confirm('Reset all inputs?')) location.reload();
+        }
+
+        function initialize() {
+            updateClock();
+            createInteractiveDelivery();
+            createInteractiveMacro();
+            
+            setTimeout(() => {
+                runBaselineProtocol();
+                updateDeliveryMacroRecommendations();
+            }, 400);
+
+            const ids = ['original-budget', 'active-risk', 'current-lots', 'floating-pnl', 'daily-objective'];
+            ids.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener('input', runBaselineProtocol);
+            });
+        }
+
+        window.onload = initialize;
+    </script>
+</body>
+</html>

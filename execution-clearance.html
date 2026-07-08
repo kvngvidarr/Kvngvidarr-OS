@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KVNGVIDARR — EXECUTION CLEARANCE v3.0</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+    body { font-family: 'Inter', system_ui, sans-serif; background: #0A0A0A; color: #E5E5E5; }
+    .section-header { font-size: 0.7rem; letter-spacing: 1.5px; font-weight: 700; text-transform: uppercase; color: #D4AF37; }
+    .trading-card { background-color: #111111; border: 1px solid #222222; }
+    .check-item { border-left: 3px solid #D4AF37; padding-left: 12px; }
+    .fail { border-left-color: #ff3355; }
+    .status-go { background-color: #052e16; border-color: #00ff88; color: #00ff88; }
+    .status-restricted { background-color: #1a1400; border-color: #ffcc00; color: #ffcc00; }
+    .status-no { background-color: #1a0a0a; border-color: #ff3355; color: #ff3355; }
+</style>
+</head>
+<body>
+<div class="max-w-screen-2xl mx-auto">
+    <!-- Header -->
+    <div class="border-b border-[#222222] bg-[#0A0A0A] px-8 py-5 flex items-center justify-between sticky top-0 z-50">
+        <div>
+            <div class="font-bold text-3xl tracking-[-1px]">EXECUTION CLEARANCE</div>
+            <div class="text-xs text-[#D4AF37] -mt-1">v3.0 • Pre-Trade Gate + Process Enforcer</div>
+        </div>
+        <div class="text-right">
+            <div id="live-time" class="font-mono text-lg font-semibold"></div>
+            <div class="text-xs text-[#666]">NY TIME</div>
+        </div>
+    </div>
+
+    <div class="p-8">
+
+        <!-- PRE-TRADE GATE (FROM ONE-PAGER) -->
+        <div class="trading-card rounded-3xl p-6 mb-6">
+            <div class="section-header mb-4">PRE-TRADE GATE — ONE-PAGER PROCESS (READ BEFORE EVERY TRADE)</div>
+            
+            <div class="space-y-4" id="pretrade-gate">
+                <!-- Populated by JS -->
+            </div>
+
+            <div class="mt-6">
+                <button onclick="checkPreTradeGate()" class="w-full bg-[#D4AF37] hover:bg-[#c5a133] text-black font-bold py-3 rounded-2xl">RUN PRE-TRADE GATE CHECK</button>
+            </div>
+        </div>
+
+        <!-- CURRENT STATE -->
+        <div class="trading-card rounded-3xl p-6 mb-6">
+            <div class="section-header mb-4">CURRENT MARKET STATE</div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="text-xs text-[#666] block mb-1">M30 RCC STATE</label>
+                    <select id="rcc-state" class="w-full bg-[#0A0A0A] border border-[#333] rounded-2xl p-3">
+                        <option value="sustained">SUSTAINED</option>
+                        <option value="transitional">TRANSITIONAL</option>
+                        <option value="rotational">ROTATIONAL</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-xs text-[#666] block mb-1">DELIVERY STATE</label>
+                    <select id="delivery-state" class="w-full bg-[#0A0A0A] border border-[#333] rounded-2xl p-3">
+                        <option value="s1">S1 - Sustained Delivery</option>
+                        <option value="s2">S2 - Transitional</option>
+                        <option value="s3">S3 - Rebalance Failure</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-xs text-[#666] block mb-1">CURRENT SESSION / SWEEP WINDOW</label>
+                    <select id="session" class="w-full bg-[#0A0A0A] border border-[#333] rounded-2xl p-3">
+                        <option value="asia">ASIA (8-9pm sweep)</option>
+                        <option value="ldn">LDN (2-3am sweep)</option>
+                        <option value="ny">NY (9-10am sweep)</option>
+                        <option value="other">Outside Key Windows</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- FINAL CLEARANCE OUTPUT -->
+        <div class="trading-card rounded-3xl p-6 mb-6">
+            <div class="section-header mb-4">FINAL EXECUTION CLEARANCE</div>
+            <div id="final-output" class="p-6 rounded-2xl border text-xl font-bold text-center">
+                Complete the Pre-Trade Gate check above.
+            </div>
+            <div id="final-restrictions" class="mt-4 p-4 bg-[#0A0A0A] rounded-2xl text-sm hidden"></div>
+        </div>
+
+        <!-- KEY SWEEP WINDOWS -->
+        <div class="trading-card rounded-3xl p-6">
+            <div class="section-header mb-4">KEY SWEEP WINDOWS (HIGH PROBABILITY LIQUIDITY EVENTS)</div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                <div class="p-4 bg-[#0A0A0A] rounded-2xl border border-[#D4AF37]">
+                    <div class="font-bold">ASIA SWEEP WINDOW</div>
+                    <div>8:00 PM – 9:00 PM NY</div>
+                    <div class="text-xs text-[#666] mt-2">Primary liquidity sweep. Highest probability continuation entries after clean sweep + FVG formation.</div>
+                </div>
+                <div class="p-4 bg-[#0A0A0A] rounded-2xl border border-[#ffcc00]">
+                    <div class="font-bold">LDN SWEEP WINDOW</div>
+                    <div>2:00 AM – 3:00 AM NY</div>
+                    <div class="text-xs text-[#666] mt-2">High risk window. Often manufactures sweeps to test positions. Protect capital and runners here.</div>
+                </div>
+                <div class="p-4 bg-[#0A0A0A] rounded-2xl border border-[#D4AF37]">
+                    <div class="font-bold">NY SWEEP WINDOW</div>
+                    <div>9:00 AM – 10:00 AM NY</div>
+                    <div class="text-xs text-[#666] mt-2">Major liquidity processing. Highest conviction window after 10:00 AM M30 close + delivery confirmation.</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+function updateClock() {
+    const el = document.getElementById('live-time');
+    function tick() {
+        const now = new Date();
+        el.textContent = now.toLocaleTimeString('en-US', { timeZone: 'America/New_York', hour: '2-digit', minute: '2-digit', hour12: false });
+    }
+    tick();
+    setInterval(tick, 30000);
+}
+
+const preTradeSteps = [
+    { id: 'location', label: 'LOCATION CHECK: At valid 4H + 1H liquidity extreme or defined FVG/inefficiency zone?' },
+    { id: 'm30', label: 'M30 RCC CONFIRMED: Has M30 candle closed with clear RCC state?' },
+    { id: 'htf', label: 'HTF BIAS ALIGNED: Does 4H / 1H bias support the intended direction?' },
+    { id: 'coalition', label: 'COALITION ALIGNED: DXY + Yields + NQ/SPX in agreement?' },
+    { id: 'delivery', label: 'DELIVERY STATE CHECKED: S1 = Full execution. S2/S3 = Restricted.' }
+];
+
+function renderPreTradeGate() {
+    const container = document.getElementById('pretrade-gate');
+    container.innerHTML = '';
+    
+    preTradeSteps.forEach(step => {
+        const div = document.createElement('div');
+        div.className = 'check-item p-4 bg-[#0A0A0A] rounded-2xl mb-3';
+        div.innerHTML = `
+            <div class="flex items-center justify-between">
+                <div class="font-bold">${step.label}</div>
+                <select id="${step.id}" class="bg-[#111] border border-[#333] rounded-xl px-3 py-1 text-sm">
+                    <option value="yes">YES</option>
+                    <option value="no">NO</option>
+                </select>
+            </div>
+        `;
+        container.appendChild(div);
+    });
+}
+
+function checkPreTradeGate() {
+    let allPass = true;
+    let failedSteps = [];
+
+    preTradeSteps.forEach(step => {
+        const select = document.getElementById(step.id);
+        if (select.value === 'no') {
+            allPass = false;
+            failedSteps.push(step.label);
+        }
+    });
+
+    const outputBox = document.getElementById('final-output');
+    const restrictionsBox = document.getElementById('final-restrictions');
+
+    if (!allPass) {
+        outputBox.innerHTML = 'NO TRADE — PRE-TRADE GATE FAILED';
+        outputBox.className = 'p-6 rounded-2xl border text-xl font-bold status-no';
+        
+        let html = '<div class="font-bold mb-2">FAILED STEPS:</div>';
+        failedSteps.forEach(step => {
+            html += `<div class="text-sm">• ${step}</div>`;
+        });
+        html += '<div class="mt-3 text-sm">Fix all failed steps before any execution is allowed.</div>';
+        restrictionsBox.innerHTML = html;
+        restrictionsBox.classList.remove('hidden');
+    } else {
+        const rcc = document.getElementById('rcc-state').value;
+        const delivery = document.getElementById('delivery-state').value;
+        const session = document.getElementById('session').value;
+
+        let status = '';
+        let restrictions = '';
+
+        if (delivery === 's3') {
+            status = 'RESTRICTED — S3 DELIVERY FAILURE';
+            restrictions = 'Rebalance failure environment. Exit rotational legs. Only hold runners. No new entries.';
+        } else if (delivery === 's2') {
+            status = 'RESTRICTED — S2 TRANSITIONAL';
+            restrictions = 'No scaling. No new conviction adds. Runner preservation + rotational extraction only.';
+        } else if (rcc === 'rotational' && session === 'ldn') {
+            status = 'HIGH RISK — ROTATIONAL + LDN SWEEP';
+            restrictions = '2-3am LDN sweep window in rotational market. Protect capital. Minimal new execution. Focus on runner protection.';
+        } else {
+            status = 'CLEAR FOR EXECUTION';
+            restrictions = 'All gates passed. Follow full system process. Respect current session sweep window.';
+        }
+
+        outputBox.innerHTML = status;
+        outputBox.className = `p-6 rounded-2xl border text-xl font-bold ${status.includes('CLEAR') ? 'status-go' : 'status-restricted'}`;
+        
+        restrictionsBox.innerHTML = restrictions;
+        restrictionsBox.classList.remove('hidden');
+    }
+}
+
+function initialize() {
+    updateClock();
+    renderPreTradeGate();
+}
+
+window.onload = initialize;
+</script>
+</body>
+</html>
