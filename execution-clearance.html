@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KVNGVIDARR — EXECUTION CLEARANCE v4.0</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+    body { font-family: 'Inter', system_ui, sans-serif; background: #0A0A0A; color: #E5E5E5; }
+    .section-header { font-size: 0.7rem; letter-spacing: 1.5px; font-weight: 700; text-transform: uppercase; color: #D4AF37; }
+    .trading-card { background-color: #111111; border: 1px solid #222222; }
+    .check-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; background: #0A0A0A; border-radius: 16px; margin-bottom: 10px; }
+    .status-go { background-color: #052e16; border-color: #00ff88; color: #00ff88; }
+    .status-no { background-color: #1a0a0a; border-color: #ff3355; color: #ff3355; }
+</style>
+</head>
+<body>
+<div class="max-w-screen-md mx-auto">
+    <!-- Header -->
+    <div class="border-b border-[#222222] bg-[#0A0A0A] px-6 py-5 flex items-center justify-between sticky top-0 z-50">
+        <div>
+            <div class="font-bold text-2xl tracking-[-1px]">EXECUTION CLEARANCE</div>
+            <div class="text-xs text-[#D4AF37] -mt-1">v4.0 • Pre-Trade Gate</div>
+        </div>
+        <div class="text-right">
+            <div id="live-time" class="font-mono text-base font-semibold"></div>
+        </div>
+    </div>
+
+    <div class="p-6">
+
+        <!-- PRE-TRADE CHECKLIST -->
+        <div class="trading-card rounded-3xl p-6 mb-6">
+            <div class="section-header mb-4">PRE-TRADE GATE CHECKLIST</div>
+            <div class="text-xs text-[#999] mb-4">Go through every item before entering any trade.</div>
+
+            <div id="checklist">
+                <!-- Populated by JavaScript -->
+            </div>
+
+            <button onclick="runChecklist()" 
+                    class="mt-4 w-full bg-[#D4AF37] hover:bg-[#c5a133] text-black font-bold py-3 rounded-2xl">
+                CHECK MY TRADE
+            </button>
+        </div>
+
+        <!-- RESULT -->
+        <div class="trading-card rounded-3xl p-6 mb-6">
+            <div class="section-header mb-4">RESULT</div>
+            <div id="result-box" class="p-6 rounded-2xl border text-xl font-bold text-center">
+                Complete the checklist above.
+            </div>
+            <div id="result-note" class="mt-4 p-4 bg-[#0A0A0A] rounded-2xl text-sm hidden"></div>
+        </div>
+
+        <!-- KEY SWEEP WINDOWS -->
+        <div class="trading-card rounded-3xl p-6">
+            <div class="section-header mb-4">KEY SWEEP WINDOWS</div>
+            <div class="grid grid-cols-1 gap-3 text-sm">
+                <div class="p-4 bg-[#0A0A0A] rounded-2xl">
+                    <span class="font-bold text-[#D4AF37]">ASIA:</span> 8:00 PM – 9:00 PM NY
+                </div>
+                <div class="p-4 bg-[#0A0A0A] rounded-2xl">
+                    <span class="font-bold text-[#D4AF37]">LDN:</span> 2:00 AM – 3:00 AM NY
+                </div>
+                <div class="p-4 bg-[#0A0A0A] rounded-2xl">
+                    <span class="font-bold text-[#D4AF37]">NY:</span> 9:00 AM – 10:00 AM NY
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+function updateClock() {
+    const el = document.getElementById('live-time');
+    function tick() {
+        const now = new Date();
+        el.textContent = now.toLocaleTimeString('en-US', { timeZone: 'America/New_York', hour: '2-digit', minute: '2-digit', hour12: false });
+    }
+    tick();
+    setInterval(tick, 30000);
+}
+
+const checklistItems = [
+    { id: 'htf-fvg', text: 'Is there a clear HTF FVG (4H or 1H) at my location?' },
+    { id: 'sweep', text: 'Has liquidity sweep been confirmed at HTF level?' },
+    { id: 'location', text: 'Am I at a valid 4H + 1H liquidity extreme or FVG zone?' },
+    { id: 'm30', text: 'Has the M30 candle closed with clear RCC confirmation?' },
+    { id: 'htf-bias', text: 'Does 4H / 1H bias support my direction?' },
+    { id: 'coalition', text: 'Is DXY + Yields + NQ/SPX aligned?' },
+    { id: 'delivery', text: 'Is Delivery State S1 (Sustained)?' }
+];
+
+function renderChecklist() {
+    const container = document.getElementById('checklist');
+    container.innerHTML = '';
+
+    checklistItems.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'check-row';
+        div.innerHTML = `
+            <div class="text-sm pr-4">${item.text}</div>
+            <select id="${item.id}" class="bg-[#111] border border-[#333] rounded-xl px-3 py-1 text-sm">
+                <option value="yes">YES</option>
+                <option value="no">NO</option>
+            </select>
+        `;
+        container.appendChild(div);
+    });
+}
+
+function runChecklist() {
+    let allYes = true;
+
+    checklistItems.forEach(item => {
+        const select = document.getElementById(item.id);
+        if (select.value === 'no') {
+            allYes = false;
+        }
+    });
+
+    const resultBox = document.getElementById('result-box');
+    const noteBox = document.getElementById('result-note');
+
+    if (allYes) {
+        resultBox.innerHTML = 'CLEAR TO TRADE';
+        resultBox.className = 'p-6 rounded-2xl border text-xl font-bold status-go';
+        noteBox.innerHTML = 'All checklist items passed. Proceed with full system process. Respect current session window.';
+        noteBox.classList.remove('hidden');
+    } else {
+        resultBox.innerHTML = 'NO TRADE';
+        resultBox.className = 'p-6 rounded-2xl border text-xl font-bold status-no';
+        noteBox.innerHTML = 'One or more checklist items failed. Do not enter any position until all items are YES.';
+        noteBox.classList.remove('hidden');
+    }
+}
+
+function initialize() {
+    updateClock();
+    renderChecklist();
+}
+
+window.onload = initialize;
+</script>
+</body>
+</html>
