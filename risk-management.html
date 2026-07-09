@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KVNGVIDARR — RISK & TRADE MANAGEMENT</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+    body { font-family: 'Inter', system_ui, sans-serif; background: #0A0A0A; color: #E5E5E5; }
+    .section-header { font-size: 0.7rem; letter-spacing: 1.5px; font-weight: 700; text-transform: uppercase; color: #D4AF37; }
+    .trading-card { background-color: #111111; border: 1px solid #222222; }
+    .metric { background-color: #0A0A0A; border: 1px solid #222222; }
+</style>
+</head>
+<body class="p-4 md:p-8 max-w-screen-xl mx-auto">
+
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <div class="font-bold text-3xl tracking-[-1px]">RISK & TRADE MANAGEMENT</div>
+            <div class="text-xs text-[#D4AF37]">KVNGVIDARR SYSTEM • Extraction + Post-Extraction Protocol</div>
+        </div>
+        <div class="text-right text-xs text-[#666]">
+            <div id="live-time"></div>
+            <div>NY TIME</div>
+        </div>
+    </div>
+
+    <!-- CAMPAIGN INPUT -->
+    <div class="trading-card rounded-3xl p-6 mb-6">
+        <div class="section-header mb-4">CAMPAIGN INPUT</div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div>
+                <label class="text-xs text-[#666] block mb-1">Total Active Lots</label>
+                <input id="total-lots" type="number" class="w-full bg-[#0A0A0A] border border-[#333] rounded-2xl p-3" placeholder="e.g. 0.09">
+            </div>
+            <div>
+                <label class="text-xs text-[#666] block mb-1">Total Active Risk ($)</label>
+                <input id="total-risk" type="number" class="w-full bg-[#0A0A0A] border border-[#333] rounded-2xl p-3" placeholder="e.g. 135">
+            </div>
+            <div>
+                <label class="text-xs text-[#666] block mb-1">Current Floating P/L ($)</label>
+                <input id="floating-pl" type="number" class="w-full bg-[#0A0A0A] border border-[#333] rounded-2xl p-3" placeholder="e.g. 265">
+            </div>
+            <div>
+                <label class="text-xs text-[#666] block mb-1">Current R on Active Risk</label>
+                <input id="current-r" type="number" step="0.1" class="w-full bg-[#0A0A0A] border border-[#333] rounded-2xl p-3" placeholder="e.g. 1.81">
+            </div>
+        </div>
+        <button onclick="calculateExtraction()" 
+                class="mt-4 w-full bg-[#D4AF37] hover:bg-[#c5a133] text-black font-bold py-3 rounded-2xl">
+            CALCULATE EXTRACTION
+        </button>
+    </div>
+
+    <!-- EXTRACTION RESULTS -->
+    <div id="extraction-results" class="trading-card rounded-3xl p-6 mb-6 hidden">
+        <div class="section-header mb-4">EXTRACTION GUIDANCE</div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="metric rounded-2xl p-4">
+                <div class="text-xs text-[#666]">Current R Multiple</div>
+                <div id="current-r-display" class="font-bold text-3xl mt-1"></div>
+            </div>
+            <div class="metric rounded-2xl p-4">
+                <div class="text-xs text-[#666]">1.58R Extraction Trigger</div>
+                <div id="extract-158" class="font-bold text-xl mt-1 text-[#D4AF37]"></div>
+            </div>
+            <div class="metric rounded-2xl p-4">
+                <div class="text-xs text-[#666]">Recommended Action</div>
+                <div id="recommended-action" class="font-bold text-lg mt-1"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- POST-EXTRACTION PROTOCOL (NEW) -->
+    <div class="trading-card rounded-3xl p-6 mb-6">
+        <div class="section-header mb-4">POST-EXTRACTION PROTOCOL</div>
+        <div class="text-sm text-[#999] mb-4">Run this immediately after any extraction. Do not make new assumptions until this is complete.</div>
+
+        <div class="space-y-4">
+            <!-- Step 1 -->
+            <div class="flex gap-4">
+                <div class="w-8 h-8 flex-shrink-0 rounded-full bg-[#D4AF37] text-black flex items-center justify-center font-bold">1</div>
+                <div class="flex-1">
+                    <div class="font-bold">Execute Authorized Extraction</div>
+                    <div class="text-xs text-[#666]">Complete the scale-out recommended by the dashboard. Do not partial or hesitate.</div>
+                </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="flex gap-4">
+                <div class="w-8 h-8 flex-shrink-0 rounded-full bg-[#D4AF37] text-black flex items-center justify-center font-bold">2</div>
+                <div class="flex-1">
+                    <div class="font-bold">Freeze New Directional Assumptions</div>
+                    <div class="text-xs text-[#666]">Do not assume continuation or reversal yet. The market is in transition.</div>
+                </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="flex gap-4">
+                <div class="w-8 h-8 flex-shrink-0 rounded-full bg-[#D4AF37] text-black flex items-center justify-center font-bold">3</div>
+                <div class="flex-1">
+                    <div class="font-bold">Scan Opposing Flow (M15 RCC)</div>
+                    <div class="text-xs text-[#666] mt-1">Check the opposing direction on M15:</div>
+                    <div class="mt-2 grid grid-cols-2 gap-2 text-xs">
+                        <div class="bg-[#0A0A0A] p-3 rounded-2xl">• M15 opposing close confirmation?</div>
+                        <div class="bg-[#0A0A0A] p-3 rounded-2xl">• M30 transition state?</div>
+                        <div class="bg-[#0A0A0A] p-3 rounded-2xl">• H1 delivery continuation or rejection?</div>
+                        <div class="bg-[#0A0A0A] p-3 rounded-2xl">• Nearby inefficiency reaction?</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 4 -->
+            <div class="flex gap-4">
+                <div class="w-8 h-8 flex-shrink-0 rounded-full bg-[#D4AF37] text-black flex items-center justify-center font-bold">4</div>
+                <div class="flex-1">
+                    <div class="font-bold">Decide Based on Evidence</div>
+                    <div class="mt-2 grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+                        <div class="bg-[#0A0A0A] p-4 rounded-2xl border border-[#333]">
+                            <div class="font-bold text-[#D4AF37]">HOLD RUNNERS</div>
+                            <div class="text-xs mt-1">If opposing flow is weak and original delivery still intact.</div>
+                        </div>
+                        <div class="bg-[#0A0A0A] p-4 rounded-2xl border border-[#333]">
+                            <div class="font-bold text-[#D4AF37]">TRAIL RUNNERS</div>
+                            <div class="text-xs mt-1">If structure is still valid but momentum is fading.</div>
+                        </div>
+                        <div class="bg-[#0A0A0A] p-4 rounded-2xl border border-[#333]">
+                            <div class="font-bold text-[#D4AF37]">STAND DOWN / RE-EVALUATE</div>
+                            <div class="text-xs mt-1">If 2-3am window is active or opposing flow is strong.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-6 p-4 bg-[#1a1400] border border-[#D4AF37] rounded-2xl text-xs">
+            <strong class="text-[#D4AF37]">2–3AM TRANSITION WINDOW RULE:</strong><br>
+            After extraction during 2–3am, default to <strong>Stand Down + Trail Only</strong>. 
+            Do not re-enter or add until after 3am unless clear opposing M15 confirmation appears.
+        </div>
+    </div>
+
+    <div class="text-center text-xs text-[#555] mt-8">
+        Extraction works. Post-extraction discipline protects the edge.<br>
+        Process > Emotion.
+    </div>
+
+<script>
+function updateClock() {
+    const el = document.getElementById('live-time');
+    function tick() {
+        const now = new Date();
+        el.textContent = now.toLocaleTimeString('en-US', { 
+            timeZone: 'America/New_York', 
+            hour: '2-digit', 
+            minute: '2-digit', 
+            hour12: false 
+        });
+    }
+    tick();
+    setInterval(tick, 30000);
+}
+
+function calculateExtraction() {
+    const lots = parseFloat(document.getElementById('total-lots').value);
+    const risk = parseFloat(document.getElementById('total-risk').value);
+    const floating = parseFloat(document.getElementById('floating-pl').value);
+    const currentR = parseFloat(document.getElementById('current-r').value);
+
+    if (!lots || !risk || !floating || !currentR) {
+        alert("Please fill in all fields");
+        return;
+    }
+
+    const resultsDiv = document.getElementById('extraction-results');
+    resultsDiv.classList.remove('hidden');
+
+    document.getElementById('current-r-display').textContent = currentR.toFixed(2) + "R";
+
+    // 1.58R calculation
+    const target158 = (risk * 1.58).toFixed(2);
+    document.getElementById('extract-158').innerHTML = 
+        `$${target158} floating<br><span class="text-xs text-[#666]">Recommended extraction zone</span>`;
+
+    // Recommendation logic
+    let action = "";
+    if (currentR >= 1.58) {
+        action = `<span class="text-[#D4AF37]">EXTRACT NOW</span><br><span class="text-xs">Scale out 40-50% of campaign</span>`;
+    } else if (currentR >= 1.2) {
+        action = `<span class="text-yellow-400">MONITOR CLOSELY</span><br><span class="text-xs">Approaching extraction zone</span>`;
+    } else {
+        action = `<span class="text-[#666]">ALLOW DELIVERY</span><br><span class="text-xs">Not yet at extraction threshold</span>`;
+    }
+
+    document.getElementById('recommended-action').innerHTML = action;
+}
+
+window.onload = function() {
+    updateClock();
+};
+</script>
+</body>
+</html>
