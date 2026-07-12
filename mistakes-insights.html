@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KVNGVIDARR — MISTAKES & INSIGHTS</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+    body { font-family: 'Inter', system-ui, sans-serif; background: #0A0A0A; color: #E5E5E5; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+    input, textarea, select { background: #0A0A0A; color: #E5E5E5; }
+    input::placeholder, textarea::placeholder { color: #555; }
+    select option { background: #0A0A0A; }
+</style>
+</head>
+<body class="min-h-screen pb-16">
+<div class="max-w-2xl mx-auto px-5 pt-8">
+
+    <a href="index.html" class="text-xs text-[#666] hover:text-[#D4AF37] transition">← Dashboards</a>
+
+    <div class="text-center mt-4 mb-8">
+        <div class="font-bold text-3xl tracking-[-1px]">MISTAKES &amp; INSIGHTS</div>
+        <div class="text-[#D4AF37] text-sm mt-1">FAILURE TAXONOMY • RULE ADHERENCE • WEEKLY REVIEW</div>
+    </div>
+
+    <!-- AT A GLANCE -->
+    <div class="mb-8">
+        <div class="text-xs text-[#D4AF37] uppercase tracking-widest mb-1">At A Glance — Known Mistakes</div>
+        <div class="text-[11px] text-[#666] mb-3">Read this before or during a session. Grouped by pattern, not by date.</div>
+        <div id="glance" class="space-y-4"></div>
+    </div>
+
+    <!-- STATS -->
+    <div id="stats" class="grid grid-cols-2 gap-3 mb-2"></div>
+    <div id="rule-note" class="text-center text-xs mb-6"></div>
+
+    <!-- PENDING CONFIRMATION RULE -->
+    <div class="bg-[#111111] border border-[#333] rounded-2xl p-4 mb-6">
+        <div class="text-xs text-[#666] uppercase tracking-widest mb-2">Scaling / Re-Entry Pending Rule</div>
+        <p class="text-sm text-[#E5E5E5] mb-3">Scaling and re-entry decisions are pending until the next M30 candle opens, and entry sorts on the corresponding LTF.</p>
+        <div class="grid grid-cols-3 gap-2 text-center">
+            <div class="border border-[#333] rounded-lg py-2">
+                <div class="text-[10px] text-[#666] uppercase">4H</div>
+                <div class="text-[#D4AF37] font-mono text-sm">→ M15</div>
+            </div>
+            <div class="border border-[#333] rounded-lg py-2">
+                <div class="text-[10px] text-[#666] uppercase">1H</div>
+                <div class="text-[#D4AF37] font-mono text-sm">→ M5</div>
+            </div>
+            <div class="border border-[#333] rounded-lg py-2">
+                <div class="text-[10px] text-[#666] uppercase">M30</div>
+                <div class="text-[#D4AF37] font-mono text-sm">→ M1</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADD INCIDENT -->
+    <details class="bg-[#111111] border border-[#333] rounded-2xl p-4 mb-6">
+        <summary class="text-xs text-[#666] uppercase tracking-widest cursor-pointer">+ Log a new incident</summary>
+        <div class="mt-4">
+
+        <label class="block mb-3">
+            <span class="block text-[11px] text-[#666] uppercase mb-1">Date</span>
+            <input id="f-date" type="date" class="w-full border border-[#333] rounded-lg px-3 py-2 text-sm">
+        </label>
+
+        <label class="block mb-3">
+            <span class="block text-[11px] text-[#666] uppercase mb-1">Failure Type</span>
+            <select id="f-type" class="w-full border border-[#333] rounded-lg px-3 py-2 text-sm"></select>
+        </label>
+
+        <label class="block mb-3">
+            <span class="block text-[11px] text-[#666] uppercase mb-1">Description</span>
+            <textarea id="f-desc" rows="2" class="w-full border border-[#333] rounded-lg px-3 py-2 text-sm" placeholder="What happened…"></textarea>
+        </label>
+
+        <div class="grid grid-cols-2 gap-3 mb-3">
+            <label class="block">
+                <span class="block text-[11px] text-[#666] uppercase mb-1">Cost ($)</span>
+                <input id="f-cost" type="number" step="0.01" class="w-full border border-[#333] rounded-lg px-3 py-2 text-sm" placeholder="0.00">
+            </label>
+            <label class="block">
+                <span class="block text-[11px] text-[#666] uppercase mb-1">Classification</span>
+                <select id="f-class" class="w-full border border-[#333] rounded-lg px-3 py-2 text-sm">
+                    <option value="tuition">Tuition</option>
+                    <option value="violation">Violation</option>
+                </select>
+            </label>
+        </div>
+
+        <label class="block mb-3">
+            <span class="block text-[11px] text-[#666] uppercase mb-1">Rule Violated (cited by name)</span>
+            <input id="f-rule" type="text" class="w-full border border-[#333] rounded-lg px-3 py-2 text-sm" placeholder="e.g. Post-Extraction Reversal Protocol">
+        </label>
+
+        <div class="grid grid-cols-2 gap-3 mb-3">
+            <label class="block">
+                <span class="block text-[11px] text-[#666] uppercase mb-1">Rule Origin</span>
+                <select id="f-origin" class="w-full border border-[#333] rounded-lg px-3 py-2 text-sm">
+                    <option value="existing">Known rule broken</option>
+                    <option value="new">New rule discovered</option>
+                </select>
+            </label>
+            <label class="block">
+                <span class="block text-[11px] text-[#666] uppercase mb-1">Resolution Status</span>
+                <select id="f-status" class="w-full border border-[#333] rounded-lg px-3 py-2 text-sm">
+                    <option value="untested">Not yet tested</option>
+                    <option value="held">Tested — held</option>
+                    <option value="broken_again">Tested — broken again</option>
+                </select>
+            </label>
+        </div>
+
+        <label class="block mb-4">
+            <span class="block text-[11px] text-[#666] uppercase mb-1">Resolution Notes</span>
+            <textarea id="f-notes" rows="2" class="w-full border border-[#333] rounded-lg px-3 py-2 text-sm" placeholder="Optional"></textarea>
+        </label>
+
+        <button onclick="addIncident()" class="w-full bg-[#D4AF37] text-black font-bold rounded-lg py-2.5 text-sm hover:opacity-90 transition">Add Incident</button>
+        </div>
+    </details>
+
+    <!-- FILTER -->
+    <div class="flex gap-2 mb-4">
+        <button id="filter-week" onclick="setFilter('week')" class="flex-1 border border-[#333] text-[#E5E5E5] rounded-lg py-2 text-xs uppercase tracking-wide transition">This Week</button>
+        <button id="filter-all" onclick="setFilter('all')" class="flex-1 border border-[#D4AF37] text-[#D4AF37] rounded-lg py-2 text-xs uppercase tracking-wide transition">All Time</button>
+    </div>
+
+    <!-- FREQUENCY BY FAILURE TYPE -->
+    <div class="bg-[#111111] border border-[#333] rounded-2xl p-4 mb-6">
+        <div class="text-xs text-[#666] uppercase tracking-widest mb-3">Frequency by Failure Type</div>
+        <div id="freq-type" class="space-y-2"></div>
+    </div>
+
+    <!-- RULE VIOLATION FREQUENCY -->
+    <div class="bg-[#111111] border border-[#333] rounded-2xl p-4 mb-6">
+        <div class="text-xs text-[#666] uppercase tracking-widest mb-3">Rules Violated Most Often</div>
+        <div id="freq-rule" class="space-y-2"></div>
+    </div>
+
+    <!-- PENDING RETESTS -->
+    <div class="bg-[#111111] border border-[#D4AF37] rounded-2xl p-4 mb-6">
+        <div class="text-xs text-[#D4AF37] uppercase tracking-widest mb-3">New Rules Pending Retest</div>
+        <div id="pending" class="space-y-2"></div>
+    </div>
+
+    <!-- LOG -->
+    <div class="mb-6">
+        <div class="text-xs text-[#666] uppercase tracking-widest mb-3">Full Chronological Log</div>
+        <div id="log" class="space-y-2"></div>
+    </div>
+
+    <div class="text-center text-xs text-[#555] mb-10">
+        Data is stored locally in this browser only — it will not sync across devices.<br>
+        Log weekly to keep frequency tracking accurate.
+    </div>
+
+</div>
+
+<script>
+    const TAXONOMY = [
+        { key: 'htf_bias', label: 'Entry without HTF bias confirmation' },
+        { key: 'transition_window', label: 'Entry inside 2–3AM (or other flagged) transition window' },
+        { key: 'scaling_no_stop', label: 'Scaling without predefined stop/risk decided in advance' },
+        { key: 'reentry_no_recheck', label: 'Post-extraction re-entry without delivery-state re-check' },
+        { key: 'interference', label: 'Interference before structural invalidation' },
+        { key: 'sizing_inconsistent', label: 'Position sizing inconsistent with stated risk room' },
+    ];
+
+    const STORE_KEY = 'kvngvidarr_mistakes_log';
+    let incidents = [];
+    let filter = 'all';
+
+    const SEED_DATA = [
+        {
+            id: 'seed-htf-bias-1',
+            date: '2026-07-08',
+            type: 'htf_bias',
+            desc: "Wednesday's FOMC test and Thursday's overnight entries both skipped the top-down / HTF bias check in favor of reacting to dashboard signals and volatility. Described in review as \u201cinstinctive\u2026 post-centralization\u201d across multiple sessions.",
+            cost: 0,
+            cls: 'violation',
+            rule: 'Mandatory Top-Down / HTF Bias Check',
+            origin: 'existing',
+            status: 'broken_again',
+            notes: 'Structural gap: no mechanism yet blocks entry without a logged HTF bias check. Cost wasn\u2019t quantified in the source review \u2014 update with the real $ if known.',
+        },
+        {
+            id: 'seed-transition-1',
+            date: '2026-07-09',
+            type: 'transition_window',
+            desc: 'Overnight giveback occurred in the 2\u20133AM transition window \u2014 a window that\u2019s flagged and monitored as a mandatory transition-monitoring period, but monitoring alone didn\u2019t stop the entry. This is a repeating pattern, not a one-off.',
+            cost: 0,
+            cls: 'violation',
+            rule: '2\u20133AM Transition Caution',
+            origin: 'existing',
+            status: 'broken_again',
+            notes: 'Known and named repeatedly \u2014 the gap is that it\u2019s monitored, not hard-blocked. Cost wasn\u2019t quantified in the source review \u2014 update with the real $ if known.',
+        },
+        {
+            id: 'seed-reentry-1',
+            date: '2026-07-09',
+            type: 'reentry_no_recheck',
+            desc: 'Short campaign \u2192 extraction \u2192 immediate long reversal \u2192 long stopped/extended \u2192 another short, all within hours on the same instrument. High cognitive load raises the odds the delivery-state-change test gets applied loosely under time pressure.',
+            cost: 0,
+            cls: 'violation',
+            rule: 'Post-Extraction Reversal Protocol',
+            origin: 'new',
+            status: 'untested',
+            notes: 'Rule created directly in response to this session \u2014 not yet retested. This is the one to watch first next session.',
+        },
+        {
+            id: 'seed-scaling-1',
+            date: '2026-07-10',
+            type: 'scaling_no_stop',
+            desc: 'Base/scale-in ratios differed every session (0.05+0.05, 0.03+0.03+0.02, 0.02+0.01+0.03+0.04) with the reasoning reconstructed after entry rather than decided before. Self-flagged: \u201cI would not split the campaign 50-50 by default\u2026 that\u2019s where I\u2019m confused about the allocation.\u201d',
+            cost: 0,
+            cls: 'violation',
+            rule: 'Predefined Campaign Risk Split (CARE)',
+            origin: 'existing',
+            status: 'untested',
+            notes: 'This is ambiguity in the allocation rule itself, not just adherence to it \u2014 needs a clear default before the next session.',
+        },
+    ];
+
+    function load() {
+        try { incidents = JSON.parse(localStorage.getItem(STORE_KEY) || '[]'); }
+        catch (e) { incidents = []; }
+        if (incidents.length === 0) {
+            incidents = SEED_DATA.slice();
+            save();
+        }
+    }
+    function save() { localStorage.setItem(STORE_KEY, JSON.stringify(incidents)); }
+
+    function startOfWeek() {
+        const d = new Date();
+        const day = d.getDay();
+        const diff = (day === 0 ? -6 : 1) - day;
+        const monday = new Date(d);
+        monday.setDate(d.getDate() + diff);
+        monday.setHours(0, 0, 0, 0);
+        return monday;
+    }
+
+    function filtered() {
+        if (filter === 'all') return incidents;
+        const start = startOfWeek();
+        return incidents.filter((i) => new Date(i.date) >= start);
+    }
+
+    function typeLabel(key) {
+        const t = TAXONOMY.find((t) => t.key === key);
+        return t ? t.label : key;
+    }
+
+    function fmtUSD(n) {
+        n = Number(n) || 0;
+        return '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function populateTypeSelect() {
+        document.getElementById('f-type').innerHTML =
+            TAXONOMY.map((t) => `<option value="${t.key}">${t.label}</option>`).join('');
+    }
+
+    function addIncident() {
+        const date = document.getElementById('f-date').value || new Date().toISOString().slice(0, 10);
+        const type = document.getElementById('f-type').value;
+        const desc = document.getElementById('f-desc').value.trim();
+        const cost = parseFloat(document.getElementById('f-cost').value) || 0;
+        const cls = document.getElementById('f-class').value;
+        const rule = document.getElementById('f-rule').value.trim();
+        const origin = document.getElementById('f-origin').value;
+        const status = document.getElementById('f-status').value;
+        const notes = document.getElementById('f-notes').value.trim();
+
+        if (!desc) { alert('Add a short description of what happened.'); return; }
+
+        incidents.unshift({ id: Date.now().toString(), date, type, desc, cost, cls, rule, origin, status, notes });
+        save();
+
+        document.getElementById('f-desc').value = '';
+        document.getElementById('f-cost').value = '';
+        document.getElementById('f-rule').value = '';
+        document.getElementById('f-notes').value = '';
+
+        renderAll();
+    }
+
+    function deleteIncident(id) {
+        incidents = incidents.filter((i) => i.id !== id);
+        save();
+        renderAll();
+    }
+
+    function updateStatus(id, status) {
+        const inc = incidents.find((i) => i.id === id);
+        if (inc) { inc.status = status; save(); renderAll(); }
+    }
+
+    function setFilter(f) {
+        filter = f;
+        document.getElementById('filter-week').className = 'flex-1 border rounded-lg py-2 text-xs uppercase tracking-wide transition ' +
+            (f === 'week' ? 'border-[#D4AF37] text-[#D4AF37]' : 'border-[#333] text-[#E5E5E5]');
+        document.getElementById('filter-all').className = 'flex-1 border rounded-lg py-2 text-xs uppercase tracking-wide transition ' +
+            (f === 'all' ? 'border-[#D4AF37] text-[#D4AF37]' : 'border-[#333] text-[#E5E5E5]');
+        renderAll();
+    }
+
+    function renderStats() {
+        const items = filtered();
+        const totalCost = items.reduce((s, i) => s + i.cost, 0);
+        const tuitionCost = items.filter((i) => i.cls === 'tuition').reduce((s, i) => s + i.cost, 0);
+        const violationCost = items.filter((i) => i.cls === 'violation').reduce((s, i) => s + i.cost, 0);
+        const newRules = items.filter((i) => i.origin === 'new').length;
+        const knownBroken = items.filter((i) => i.origin === 'existing').length;
+
+        document.getElementById('stats').innerHTML = `
+            <div class="bg-[#111111] border border-[#333] rounded-xl p-3">
+                <div class="text-[10px] text-[#666] uppercase">Incidents</div>
+                <div class="text-xl font-bold">${items.length}</div>
+            </div>
+            <div class="bg-[#111111] border border-[#333] rounded-xl p-3">
+                <div class="text-[10px] text-[#666] uppercase">Total Cost</div>
+                <div class="text-xl font-bold text-[#E5484D]">${fmtUSD(totalCost)}</div>
+            </div>
+            <div class="bg-[#111111] border border-[#333] rounded-xl p-3">
+                <div class="text-[10px] text-[#666] uppercase">Tuition / Violation</div>
+                <div class="text-sm font-mono mt-1"><span class="text-[#E5E5E5]">${fmtUSD(tuitionCost)}</span> / <span class="text-[#E5484D]">${fmtUSD(violationCost)}</span></div>
+            </div>
+            <div class="bg-[#111111] border border-[#333] rounded-xl p-3">
+                <div class="text-[10px] text-[#666] uppercase">New Rules / Known Broken</div>
+                <div class="text-sm font-mono mt-1"><span class="text-[#D4AF37]">${newRules}</span> / <span class="text-[#E5E5E5]">${knownBroken}</span></div>
+            </div>
+        `;
+
+        const note = document.getElementById('rule-note');
+        if (items.length === 0) {
+            note.innerHTML = '';
+        } else if (newRules > knownBroken) {
+            note.innerHTML = '<span class="text-[#E5484D]">Rule creation is outpacing rule adherence.</span>';
+        } else {
+            note.innerHTML = '<span class="text-[#666]">Rule adherence is holding relative to new rule creation.</span>';
+        }
+    }
+
+    function bar(count, max, label, tone) {
+        const pct = max ? Math.round((count / max) * 100) : 0;
+        const color = tone === 'danger' ? '#E5484D' : '#D4AF37';
+        return `
+            <div>
+                <div class="flex justify-between text-xs mb-1">
+                    <span class="text-[#E5E5E5]">${label}</span>
+                    <span class="text-[#666] font-mono">${count}</span>
+                </div>
+                <div class="w-full bg-[#0A0A0A] border border-[#333] rounded-full h-2 overflow-hidden">
+                    <div class="h-full" style="width:${pct}%; background:${color};"></div>
+                </div>
+            </div>
+        `;
+    }
+
+    function renderFreqType() {
+        const items = filtered();
+        const counts = TAXONOMY.map((t) => ({
+            label: t.label,
+            count: items.filter((i) => i.type === t.key).length,
+        })).sort((a, b) => b.count - a.count);
+        const max = Math.max(1, ...counts.map((c) => c.count));
+        const el = document.getElementById('freq-type');
+        el.innerHTML = counts.every((c) => c.count === 0)
+            ? '<div class="text-xs text-[#555]">No incidents logged for this range.</div>'
+            : counts.map((c) => bar(c.count, max, c.label, 'gold')).join('');
+    }
+
+    function renderFreqRule() {
+        const items = filtered().filter((i) => i.rule);
+        const groups = {};
+        items.forEach((i) => {
+            const key = i.rule.trim();
+            groups[key] = (groups[key] || 0) + 1;
+        });
+        const arr = Object.entries(groups).map(([label, count]) => ({ label, count }))
+            .sort((a, b) => b.count - a.count).slice(0, 8);
+        const max = Math.max(1, ...arr.map((c) => c.count));
+        const el = document.getElementById('freq-rule');
+        el.innerHTML = arr.length === 0
+            ? '<div class="text-xs text-[#555]">No named rules logged for this range.</div>'
+            : arr.map((c) => bar(c.count, max, c.label, 'danger')).join('');
+    }
+
+    function renderPending() {
+        const items = incidents.filter((i) => i.origin === 'new' && i.status === 'untested');
+        const el = document.getElementById('pending');
+        el.innerHTML = items.length === 0
+            ? '<div class="text-xs text-[#555]">None. Every new rule has been retested at least once.</div>'
+            : items.map((i) => `
+                <div class="border border-[#333] rounded-lg p-3">
+                    <div class="text-sm font-bold text-[#D4AF37]">${i.rule || '(unnamed rule)'}</div>
+                    <div class="text-xs text-[#666] mt-0.5">Created ${i.date} — ${typeLabel(i.type)}</div>
+                    <div class="flex gap-2 mt-2">
+                        <button onclick="updateStatus('${i.id}','held')" class="flex-1 border border-[#333] rounded-lg py-1.5 text-[11px] uppercase tracking-wide hover:border-[#D4AF37]">Held</button>
+                        <button onclick="updateStatus('${i.id}','broken_again')" class="flex-1 border border-[#333] rounded-lg py-1.5 text-[11px] uppercase tracking-wide hover:border-[#E5484D]">Broken again</button>
+                    </div>
+                </div>
+            `).join('');
+    }
+
+    function statusBadge(status) {
+        if (status === 'held') return '<span class="text-[#D4AF37]">Tested — held</span>';
+        if (status === 'broken_again') return '<span class="text-[#E5484D]">Tested — broken again</span>';
+        return '<span class="text-[#666]">Not yet tested</span>';
+    }
+
+    function renderLog() {
+        const items = filtered().slice().sort((a, b) => new Date(b.date) - new Date(a.date));
+        const el = document.getElementById('log');
+        el.innerHTML = items.length === 0
+            ? '<div class="text-xs text-[#555]">No incidents logged for this range.</div>'
+            : items.map((i) => `
+                <div class="bg-[#111111] border ${i.cls === 'violation' ? 'border-[#E5484D]' : 'border-[#333]'} rounded-xl p-3">
+                    <div class="flex items-start justify-between gap-2">
+                        <div class="text-xs text-[#666] font-mono">${i.date}</div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] uppercase px-2 py-0.5 rounded-full border ${i.cls === 'violation' ? 'border-[#E5484D] text-[#E5484D]' : 'border-[#333] text-[#E5E5E5]'}">${i.cls}</span>
+                            <button onclick="deleteIncident('${i.id}')" class="text-[#555] hover:text-[#E5484D] text-xs">✕</button>
+                        </div>
+                    </div>
+                    <div class="text-sm text-[#D4AF37] mt-1">${typeLabel(i.type)}</div>
+                    <div class="text-sm text-[#E5E5E5] mt-1">${i.desc}</div>
+                    <div class="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-xs">
+                        <span class="text-[#666]">Cost: <span class="text-[#E5E5E5]">${fmtUSD(i.cost)}</span></span>
+                        ${i.rule ? `<span class="text-[#666]">Rule: <span class="text-[#E5E5E5]">${i.rule}</span> (${i.origin === 'new' ? 'new' : 'known'})</span>` : ''}
+                        <span class="text-[#666]">Status: ${statusBadge(i.status)}</span>
+                    </div>
+                    ${i.notes ? `<div class="text-xs text-[#666] mt-2 border-t border-[#222] pt-2">${i.notes}</div>` : ''}
+                </div>
+            `).join('');
+    }
+
+    function renderGlance() {
+        const el = document.getElementById('glance');
+        const groups = TAXONOMY.map((t) => ({
+            type: t,
+            items: incidents.filter((i) => i.type === t.key).sort((a, b) => new Date(b.date) - new Date(a.date)),
+        })).filter((g) => g.items.length > 0);
+
+        if (groups.length === 0) {
+            el.innerHTML = '<div class="text-xs text-[#555]">Nothing logged yet. Add an incident below to start building your directory.</div>';
+            return;
+        }
+
+        el.innerHTML = groups.map((g) => `
+            <div>
+                <div class="text-sm font-bold text-[#E5E5E5] mb-1.5">${g.type.label} <span class="text-[#666] font-normal font-mono">(${g.items.length})</span></div>
+                <div class="space-y-1.5">
+                    ${g.items.map((i) => `
+                        <div class="bg-[#111111] border ${i.cls === 'violation' ? 'border-[#E5484D]' : 'border-[#333]'} rounded-xl p-3">
+                            <div class="flex items-center justify-between gap-2">
+                                <span class="text-[10px] uppercase px-2 py-0.5 rounded-full border ${i.cls === 'violation' ? 'border-[#E5484D] text-[#E5484D]' : 'border-[#333] text-[#E5E5E5]'}">${i.cls}</span>
+                                ${i.origin === 'new' && i.status === 'untested' ? '<span class="text-[10px] uppercase px-2 py-0.5 rounded-full border border-[#D4AF37] text-[#D4AF37]">new rule \u2014 untested</span>' : ''}
+                            </div>
+                            <div class="text-sm text-[#E5E5E5] mt-1.5">${i.desc}</div>
+                            ${i.rule ? `<div class="text-xs text-[#D4AF37] mt-2">Rule: ${i.rule}</div>` : ''}
+                            ${i.notes ? `<div class="text-xs text-[#666] mt-1">${i.notes}</div>` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function renderAll() {
+        renderGlance();
+        renderStats();
+        renderFreqType();
+        renderFreqRule();
+        renderPending();
+        renderLog();
+    }
+
+    document.getElementById('f-date').value = new Date().toISOString().slice(0, 10);
+    populateTypeSelect();
+    load();
+    renderAll();
+</script>
+</body>
+</html>
